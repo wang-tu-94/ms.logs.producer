@@ -1,0 +1,40 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: log-ingestor
+  threads:
+    virtual:
+      enabled: true
+  kafka:
+    enabled: true
+    bootstrap-servers: localhost:9092
+    producer:
+      batch-size: 32768
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        linger.ms: 10
+      compression-type: "snappy"
+grpc:
+  server:
+    port: 9090
+
+app:
+  kafka:
+    topic-name: "app-logs"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+  endpoint:
+    health:
+      show-details: always # Pour voir l'état spécifique de Kafka
+  health:
+    probes:
+      enabled: true
+    kafka:
+      enabled: true

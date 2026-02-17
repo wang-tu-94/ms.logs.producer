@@ -1,0 +1,5 @@
+rootProject.name = 'ms.logs'
+
+include 'log-sdk-starter'
+include 'log-ingestor'
+include 'proto-schema'

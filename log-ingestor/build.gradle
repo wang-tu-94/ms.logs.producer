@@ -1,0 +1,65 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+    // On garde GraalVM seulement si tu en as besoin pour GKE plus tard,
+    // sinon commente-le pour stabiliser le dev.
+    id 'org.graalvm.buildtools.native' version '0.10.1'
+}
+
+group = 'com.myproject'
+version = '0.0.1-SNAPSHOT'
+
+dependencies {
+    // 1. Contrat gRPC (ton module de protos)
+    implementation project(':proto-schema')
+
+    // 2. Spring Boot Starters (laisse le Dependency Management gérer les versions)
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-kafka'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // 3. gRPC Server Starter (compatible avec Spring Boot 3/4)
+    implementation 'net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE'
+
+    // 4. Utilitaires
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // 5. Tests
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation 'io.grpc:grpc-testing:1.65.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+springBoot {
+    // Doit correspondre EXACTEMENT au package déclaré dans ton .java
+    mainClass = 'com.myproject.log.LogIngestorApplication'
+}
+
+// On simplifie drastiquement le traitement des ressources
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// Optionnel : Config pour faciliter le bootRun en mode debug
+bootRun {
+    args = ["--spring.profiles.active=dev"]
+}
+
+graalvmNative {
+    binaries {
+        main {
+            imageName = 'log-ingestor-native' // Le nom de ton binaire
+            buildArgs.add('--verbose')
+        }
+    }
+}
