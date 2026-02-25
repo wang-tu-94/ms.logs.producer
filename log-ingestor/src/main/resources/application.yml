@@ -23,6 +23,12 @@ spring:
         request.timeout.ms: 20000
         retry.backoff.ms: 500
     properties:
+      # Si KAFKA_PROTOCOL n'est pas fourni, on est en PLAINTEXT (pas d'auth)
+      security.protocol: ${KAFKA_PROTOCOL:PLAINTEXT}
+      # Si on utilise SASL, on définit le mécanisme (ex: PLAIN ou SCRAM-SHA-512)
+      sasl.mechanism: ${KAFKA_SASL_MECHANISM:PLAIN}
+      # La config JAAS n'est lue que si le protocole est SASL
+      sasl.jaas.config: ${KAFKA_JAAS_CONFIG:}
       acks: all
       retries: 10
       retry.backoff.ms: 1000
